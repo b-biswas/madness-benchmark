@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "madness-benchmark"
+version = "0.9"
+description = "Benchmarking performance for madness-deblender"
+authors = ["Biswajit Biswas <biswas@apc.in2p3.fr>"]
+readme = "README.md"
+keywords = ["galaxies", "deblending", "cosmology", "generative models"]
+license = "MIT"
+packages = [
+    { include = "madness-benchmark" },
+]
+repository = "https://github.com/b-biswas/madness-benchmark"
+
+[tool.poetry.dependencies]
+blending_toolkit = "1.0.0b2"
+galsim = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
