@@ -16,17 +16,18 @@ import scarlet
 import scarlet.psf
 import sep
 import yaml
-from maddeb.metrics import compute_aperture_photometry, compute_pixel_cosdist
-from maddeb.utils import get_maddeb_config_path
+from madness_deblender.metrics import compute_aperture_photometry, compute_pixel_cosdist
+
+from madness_benchmark.utils import get_benchmark_config_path
 
 # logging level set to INFO
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 LOG = logging.getLogger(__name__)
 
-with open(get_maddeb_config_path()) as f:
-    maddeb_config = yaml.safe_load(f)
+with open(get_benchmark_config_path()) as f:
+    benchmark_config = yaml.safe_load(f)
 
-survey_name = maddeb_config["survey_name"]
+survey_name = benchmark_config["survey_name"]
 if survey_name not in ["LSST", "HSC"]:
     raise ValueError(
         "survey should be one of: LSST or HSC"
@@ -40,8 +41,8 @@ if density not in ["high", "low"]:
     raise ValueError("The second argument should be either isolated or blended")
 
 num_repetations = 300
-simulation_path = os.path.join(maddeb_config["TEST_DATA_PATH"][survey_name], density)
-results_path = maddeb_config["RESULTS_PATH"][survey_name]
+simulation_path = os.path.join(benchmark_config["TEST_DATA_PATH"][survey_name], density)
+results_path = benchmark_config["RESULTS_PATH"][survey_name]
 density_level = density + "_density"
 
 psf_fwhm = []

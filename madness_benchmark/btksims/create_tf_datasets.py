@@ -3,14 +3,15 @@
 import os
 
 import yaml
-from maddeb.dataset_generator import loadCATSIMDataset
-from maddeb.utils import get_maddeb_config_path
+from madness_deblender.dataset_generator import loadCATSIMDataset
 
-with open(get_maddeb_config_path()) as f:
-    maddeb_config = yaml.safe_load(f)
+from madness_benchmark.utils import get_benchmark_config_path
 
-btksims_config = maddeb_config["btksims"]
-survey_name = maddeb_config["survey_name"]
+with open(get_benchmark_config_path()) as f:
+    benchmark_config = yaml.safe_load(f)
+
+btksims_config = benchmark_config["btksims"]
+survey_name = benchmark_config["survey_name"]
 
 loadCATSIMDataset(
     train_data_dir=os.path.join(
@@ -22,7 +23,7 @@ loadCATSIMDataset(
         "blended_validation",
     ),
     output_dir=os.path.join(
-        maddeb_config["TF_DATASET_PATH"][survey_name], "blended_tfDataset"
+        benchmark_config["TF_DATASET_PATH"][survey_name], "blended_tfDataset"
     ),
 )
 
@@ -36,7 +37,7 @@ loadCATSIMDataset(
         "isolated_validation",
     ),
     output_dir=os.path.join(
-        maddeb_config["TF_DATASET_PATH"][survey_name],
+        benchmark_config["TF_DATASET_PATH"][survey_name],
         "isolated_tfDataset",
     ),
 )
