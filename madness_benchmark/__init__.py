@@ -1,1 +1,3 @@
-__version__ = "0.9"
+"""Init file."""
+
+__version__ = '0.9'
