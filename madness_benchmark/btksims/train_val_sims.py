@@ -13,11 +13,10 @@ import numpy as np
 import pandas as pd
 import yaml
 from astropy.table import Table
-
 from madness_deblender.extraction import extract_cutouts
 
-from madness_benchmark.utils import get_benchmark_config_path
 from madness_benchmark.btksims.sampling import CustomSampling
+from madness_benchmark.utils import get_benchmark_config_path
 
 logging.basicConfig(format="%(message)s", level=logging.INFO)
 

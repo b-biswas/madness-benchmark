@@ -1,9 +1,10 @@
 """First call to generate tf datasets."""
 
 import os
-import yaml
 
+import yaml
 from madness_deblender.dataset_generator import loadCATSIMDataset
+
 from madness_benchmark.utils import get_benchmark_config_path
 
 with open(get_benchmark_config_path()) as f:

@@ -10,11 +10,13 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import yaml
 from galcheat.utilities import mean_sky_level
-
 from madness_deblender.callbacks import changeAlpha, define_callbacks
 from madness_deblender.dataset_generator import batched_CATSIMDataset
 from madness_deblender.FlowVAEnet import FlowVAEnet
-from madness_deblender.losses import deblender_encoder_loss_wrapper, deblender_loss_fn_wrapper
+from madness_deblender.losses import (
+    deblender_encoder_loss_wrapper,
+    deblender_loss_fn_wrapper,
+)
 from madness_deblender.utils import get_data_dir_path
 
 from madness_benchmark import get_benchmark_config_path

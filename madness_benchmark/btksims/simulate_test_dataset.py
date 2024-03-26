@@ -8,9 +8,9 @@ import sys
 import btk
 import yaml
 from astropy.table import Table
-from madness_benchmark.utils import get_benchmark_config_path
 
 from madness_benchmark.btksims.sampling import CustomSampling
+from madness_benchmark.utils import get_benchmark_config_path
 
 # logging level set to INFO
 logging.basicConfig(format="%(message)s", level=logging.INFO)

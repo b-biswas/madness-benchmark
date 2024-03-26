@@ -16,7 +16,6 @@ import scarlet
 import scarlet.psf
 import sep
 import yaml
-
 from madness_deblender.metrics import compute_aperture_photometry, compute_pixel_cosdist
 
 from madness_benchmark.utils import get_benchmark_config_path
