@@ -8,7 +8,7 @@ import sys
 import btk
 import yaml
 from astropy.table import Table
-from maddeb.utils import get_maddeb_config_path
+from madness_benchmark.utils import get_benchmark_config_path
 
 from madness_benchmark.btksims.sampling import CustomSampling
 
@@ -22,11 +22,11 @@ density = sys.argv[1]
 if density not in ["high", "low"]:
     raise ValueError("The first argument should be either high or low")
 
-with open(get_maddeb_config_path()) as f:
-    maddeb_config = yaml.safe_load(f)
+with open(get_benchmark_config_path()) as f:
+    benchmark_config = yaml.safe_load(f)
 
-survey_name = maddeb_config["survey_name"]
-btksims_config = maddeb_config["btksims"]
+survey_name = benchmark_config["survey_name"]
+btksims_config = benchmark_config["btksims"]
 
 survey = btk.survey.get_surveys(survey_name)
 simulation_path = btksims_config["TEST_DATA_SAVE_PATH"][survey_name]

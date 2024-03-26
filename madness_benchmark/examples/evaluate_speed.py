@@ -6,12 +6,11 @@ import time
 import btk
 import btk.catalog
 import btk.draw_blends
-import btk.plot_utils
 import btk.sampling_functions
 import btk.survey
 import galsim
 import numpy as np
-from maddeb.Deblender import Deblend
+from madness_deblender.Deblender import Deblend
 
 sys.path.insert(0, "../")
 

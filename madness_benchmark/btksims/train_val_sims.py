@@ -13,9 +13,10 @@ import numpy as np
 import pandas as pd
 import yaml
 from astropy.table import Table
-from maddeb.extraction import extract_cutouts
-from maddeb.utils import get_maddeb_config_path
 
+from madness_deblender.extraction import extract_cutouts
+
+from madness_benchmark.utils import get_benchmark_config_path
 from madness_benchmark.btksims.sampling import CustomSampling
 
 logging.basicConfig(format="%(message)s", level=logging.INFO)
@@ -34,11 +35,11 @@ blend_type = sys.argv[2]  # set to 4 to generate blended scenes
 if blend_type not in ["isolated", "blended"]:
     raise ValueError("The second argument should be either isolated or blended")
 
-with open(get_maddeb_config_path()) as f:
-    maddeb_config = yaml.safe_load(f)
+with open(get_benchmark_config_path()) as f:
+    benchmark_config = yaml.safe_load(f)
 
-survey_name = maddeb_config["survey_name"]
-btksims_config = maddeb_config["btksims"]
+survey_name = benchmark_config["survey_name"]
+btksims_config = benchmark_config["btksims"]
 
 sim_config = btksims_config["TRAIN_VAL_PARAMS"]
 

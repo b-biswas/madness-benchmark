@@ -10,11 +10,14 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import yaml
 from galcheat.utilities import mean_sky_level
-from maddeb.callbacks import changeAlpha, define_callbacks
-from maddeb.dataset_generator import batched_CATSIMDataset
-from maddeb.FlowVAEnet import FlowVAEnet
-from maddeb.losses import deblender_encoder_loss_wrapper, deblender_loss_fn_wrapper
-from maddeb.utils import get_data_dir_path, get_maddeb_config_path
+
+from madness_deblender.callbacks import changeAlpha, define_callbacks
+from madness_deblender.dataset_generator import batched_CATSIMDataset
+from madness_deblender.FlowVAEnet import FlowVAEnet
+from madness_deblender.losses import deblender_encoder_loss_wrapper, deblender_loss_fn_wrapper
+from madness_deblender.utils import get_data_dir_path
+
+from madness_benchmark import get_benchmark_config_path
 
 tfd = tfp.distributions
 
@@ -33,10 +36,10 @@ latent_dim = 16
 linear_norm_coeff = 10000
 patience = 30
 
-with open(get_maddeb_config_path()) as f:
-    maddeb_config = yaml.safe_load(f)
+with open(get_benchmark_config_path()) as f:
+    benchmark_config = yaml.safe_load(f)
 
-survey_name = maddeb_config["survey_name"]
+survey_name = benchmark_config["survey_name"]
 
 if survey_name not in ["LSST", "HSC"]:
     raise ValueError(
@@ -82,7 +85,7 @@ ds_isolated_train, ds_isolated_val = batched_CATSIMDataset(
     train_data_dir=None,
     val_data_dir=None,
     tf_dataset_dir=os.path.join(
-        maddeb_config["TF_DATASET_PATH"][survey_name], "isolated_tfDataset"
+        benchmark_config["TF_DATASET_PATH"][survey_name], "isolated_tfDataset"
     ),
     linear_norm_coeff=linear_norm_coeff,
     batch_size=batch_size,
@@ -222,7 +225,7 @@ if train_models.lower() == "all" or "deblender" in train_models:
         train_data_dir=None,
         val_data_dir=None,
         tf_dataset_dir=os.path.join(
-            maddeb_config["TF_DATASET_PATH"][survey_name], "blended_tfDataset"
+            benchmark_config["TF_DATASET_PATH"][survey_name], "blended_tfDataset"
         ),
         linear_norm_coeff=linear_norm_coeff,
         batch_size=batch_size,
