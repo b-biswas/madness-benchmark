@@ -1,5 +1,7 @@
 """Util functions."""
-import os 
+
+import os
+
 
 def get_benchmark_config_path():
     """Fetch path to madness_deblender config yaml file.
@@ -11,8 +13,6 @@ def get_benchmark_config_path():
 
     """
     curdir = os.path.dirname(os.path.abspath(__file__))
-    benchmark_config_path = os.path.join(
-        curdir, "benchmark_config.yaml"
-    )
+    benchmark_config_path = os.path.join(curdir, "benchmark_config.yaml")
 
     return benchmark_config_path
