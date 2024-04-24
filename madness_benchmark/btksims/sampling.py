@@ -1,7 +1,7 @@
 """Deifne Custom Sampling for BTK."""
 
-import warnings
 import logging
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -18,14 +18,13 @@ class CustomSampling(SamplingFunction):
     def __init__(
         self,
         index_range,
-        
         max_number=2,
         min_number=1,
         stamp_size=24.0,
         maxshift=None,
         unique=True,
         seed=DEFAULT_SEED,
-        dataset='train_val',
+        dataset="train_val",
         pixel_scale=0,
     ):
         """Initialize default sampling function.
@@ -62,7 +61,7 @@ class CustomSampling(SamplingFunction):
 
         if dataset not in ["train_val", "test"]:
             raise ValueError("dataset can only be either `train_val` or `test`")
-        
+
         if dataset == "test":
             if pixel_scale == 0:
                 raise ValueError("Pass appropriate pixel scale")
@@ -104,14 +103,15 @@ class CustomSampling(SamplingFunction):
             Astropy.table with entries corresponding to one blend.
 
         """
+
         def check_repeated_pixel(x_peak, y_peak, pixel_scale, maxshift):
-            dim = int(2 * maxshift/pixel_scale + 1)
+            dim = int(2 * maxshift / pixel_scale + 1)
             centers = np.zeros((dim, dim))
             for x, y in zip(x_peak, y_peak):
-                x = int(np.round(x / pixel_scale) +  maxshift/ pixel_scale)
-                y = int(np.round(y / pixel_scale) + maxshift/pixel_scale)
+                x = int(np.round(x / pixel_scale) + maxshift / pixel_scale)
+                y = int(np.round(y / pixel_scale) + maxshift / pixel_scale)
                 centers[x][y] += 1
-            return True if np.sum(centers>1)!=0 else False
+            return True if np.sum(centers > 1) != 0 else False
 
         number_of_objects = self.rng.integers(self.min_number, self.max_number + 1)
 
@@ -137,9 +137,11 @@ class CustomSampling(SamplingFunction):
                 number_of_objects, self.maxshift, self.rng
             )
             if self.dataset == "test":
-                while check_repeated_pixel(x_peak, y_peak, pixel_scale=self.pixel_scale, maxshift=self.maxshift):
+                while check_repeated_pixel(
+                    x_peak, y_peak, pixel_scale=self.pixel_scale, maxshift=self.maxshift
+                ):
                     LOG.info("Repeated centres, sampling again...")
-                    #print(pd.DataFrame({'x': x_peak, 'y': y_peak})) # just to see if they were repeated
+                    # print(pd.DataFrame({'x': x_peak, 'y': y_peak})) # just to see if they were repeated
                     x_peak, y_peak = _get_random_center_shift(
                         number_of_objects, self.maxshift, self.rng
                     )
