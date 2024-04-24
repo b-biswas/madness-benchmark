@@ -14,9 +14,13 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 import yaml
 from madness_deblender.Deblender import Deblend
-from madness_deblender.metrics import compute_aperture_photometry, compute_pixel_cosdist
 from madness_deblender.utils import get_data_dir_path
 
+from madness_benchmark.metrics import (
+    compute_aperture_photometry,
+    compute_pixel_cosdist,
+    compute_shapes,
+)
 from madness_benchmark.utils import get_benchmark_config_path
 
 # logging level set to INFO
@@ -38,7 +42,7 @@ LOG.info(f"Running tests with MADNESS for {survey_name}")
 
 density = sys.argv[1]
 kl_weight_exp = int(sys.argv[2])
-run_name = f"kl{kl_weight_exp}b"
+run_name = f"kl{kl_weight_exp}"
 map_solution = sys.argv[3].lower() == "true"
 
 if density not in ["high", "low"]:
@@ -137,6 +141,7 @@ for file_num in range(num_repetations):
         # LOG.info(field_num)
 
         current_field_predictions = []
+
         current_madness_models = {"images": [], "field_num": [], "galaxy_num": []}
 
         current_blend = blend.catalog_list[field_num]
@@ -234,6 +239,16 @@ for file_num in range(num_repetations):
             survey=survey,
         )
         madness_current_res.update(madness_photometry_current)
+
+        madness_shapes_current = compute_shapes(
+            field_image=blend.blend_images[field_num],
+            predictions=current_field_predictions,
+            xpos=blend.catalog_list[field_num]["x_peak"],
+            ypos=blend.catalog_list[field_num]["y_peak"],
+            survey=survey,
+        )
+        madness_current_res.update(madness_shapes_current)
+
         madness_current_res = pd.DataFrame.from_dict(madness_current_res)
         madness_results.append(madness_current_res)
 
@@ -252,6 +267,15 @@ for file_num in range(num_repetations):
         actual_results_current["field_num"] = field_num * num_galaxies
         actual_results_current["file_num"] = file_num * num_galaxies
         actual_results_current["galaxy_num"] = np.arange(num_galaxies)
+        actual_shapes_current = compute_shapes(
+            field_image=blend.blend_images[field_num],
+            predictions=blend.isolated_images[field_num],
+            xpos=blend.catalog_list[field_num]["x_peak"],
+            ypos=blend.catalog_list[field_num]["y_peak"],
+            survey=survey,
+        )
+        actual_results_current.update(actual_shapes_current)
+
         actual_results_current = pd.DataFrame.from_dict(actual_results_current)
         actual_photometry.append(actual_results_current)
 
