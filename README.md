@@ -1,4 +1,4 @@
 # madness-benchmark
 
 ## Under construction
-Benchmark for madness-deblender paper
+This repository reproduces the results presented in the MADNESS Deblender paper
