@@ -8,7 +8,6 @@ import sys
 import time
 
 import galcheat
-import galsim
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -16,8 +15,12 @@ import scarlet
 import scarlet.psf
 import sep
 import yaml
-from madness_deblender.metrics import compute_aperture_photometry, compute_pixel_cosdist
 
+from madness_benchmark.metrics import (
+    compute_aperture_photometry,
+    compute_pixel_cosdist,
+    compute_shapes,
+)
 from madness_benchmark.utils import get_benchmark_config_path
 
 # logging level set to INFO
@@ -52,7 +55,9 @@ for band in survey.available_filters:
 
 
 # Define function to make predictions with scarlet
-def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters):
+def predict_with_scarlet(
+    image, x_pos, y_pos, show_scene, show_sources, filters, obs_psf
+):
     """Deblend using the SCARLET deblender.
 
     Parameters
@@ -69,6 +74,8 @@ def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters)
         To run scarlet.display.show_sources or not.
     filters: list of hashable elements
         Names/identifiers of spectral channels
+    obs_psf: scarlet.ImagePSF
+        observed PSF.
 
     Returns
     -------
@@ -76,38 +83,43 @@ def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters)
         array with reconstructions predicted by SCARLET
 
     """
-    sig = []
     weights = np.ones_like(image)
-    for i in range(len(survey.available_filters)):
-        sig.append(sep.Background(image[i]).globalrms)
-        weights[i] = weights[i] / (sig[i] ** 2)
+    bkg = np.array(
+        [
+            galcheat.utilities.mean_sky_level(survey, f).to_value("electron")
+            for f in filters
+        ]
+    )
+    weights = np.ones(image.shape) / bkg.reshape((-1, 1, 1))
     observation = scarlet.Observation(
-        image, psf=scarlet.psf.ImagePSF(psf), weights=weights, channels=bands, wcs=wcs
+        image, psf=obs_psf, weights=weights, channels=filters
     )
 
     model_psf = scarlet.GaussianPSF(
-        sigma=np.asarray(psf_fwhm) / 2.355
-    )  # These numbers are derived from the FWHM given for LSST filters in the galcheat v1.0 repo https://github.com/aboucaud/galcheat/blob/main/galcheat/data/LSST.yaml
-    model_frame = scarlet.Frame(image.shape, psf=model_psf, channels=filters, wcs=wcs)
+        sigma=(0.7,) * len(filters)
+    )  # Setting this value according to the standard configuration of scarlet
+    model_frame = scarlet.Frame(image.shape, psf=model_psf, channels=filters)
 
     observation = observation.match(model_frame)
     sources = []
-    for i in range(len(x_pos)):
-        result = scarlet.ExtendedSource(
-            model_frame,
-            model_frame.get_sky_coord((x_pos[i], y_pos[i])),
-            observation,
-            thresh=1,
-            shifting=True,
-        )
-        sources.append(result)
+    centers = [(x_pos[i], y_pos[i]) for i in range(len(x_pos))]
 
-    scarlet.initialization.set_spectra_to_match(sources, observation)
+    sources, _ = scarlet.initialization.init_all_sources(
+        model_frame,
+        centers,
+        observation,
+        max_components=2,
+        min_snr=50,
+        thresh=1,
+        fallback=True,
+        silent=True,
+        set_spectra=True,
+    )
 
     scarlet_blend = scarlet.Blend(sources, observation)
 
     t0 = time.time()
-    scarlet_blend.fit(200, e_rel=1e-5)
+    scarlet_blend.fit(200, e_rel=1e-6)
     t1 = time.time()
 
     LOG.info("SCARLET TIME: " + str(t1 - t0))
@@ -137,6 +149,9 @@ def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters)
         )
         plt.show()
 
+    # scarlet.display.show_likelihood(scarlet_blend)
+    # plt.show()
+
     predicted_sources = []
     for src in sources:
         predicted_sources.append(observation.render(src.get_model(frame=model_frame)))
@@ -156,17 +171,9 @@ for file_num in range(num_repetations):
     field_images = blend.blend_images
     isolated_images = blend.isolated_images
 
-    psf = np.array(
-        [
-            p.drawImage(
-                galsim.Image(field_images[0].shape[1], field_images[0].shape[2]),
-                scale=survey.pixel_scale.to_value("arcsec"),
-            ).array
-            for p in blend.psf
-        ]
-    )
+    psf = blend.get_numpy_psf()
+    obs_psf = scarlet.ImagePSF(psf)
     bands = [f for f in survey._filters]
-    wcs = blend.wcs
 
     x_pos = blend.catalog_list[0]["y_peak"]
     y_pos = blend.catalog_list[0]["x_peak"]
@@ -181,6 +188,7 @@ for file_num in range(num_repetations):
         image = field_images[field_num]
         x_pos = blend.catalog_list[field_num]["y_peak"]
         y_pos = blend.catalog_list[field_num]["x_peak"]
+        LOG.info(blend.catalog_list[field_num])
         scarlet_current_predictions = predict_with_scarlet(
             image,
             x_pos=x_pos,
@@ -188,6 +196,7 @@ for file_num in range(num_repetations):
             show_scene=False,
             show_sources=False,
             filters=bands,
+            obs_psf=obs_psf,
         )
 
         num_galaxies = len(blend.catalog_list[field_num])
@@ -264,6 +273,16 @@ for file_num in range(num_repetations):
             survey=survey,
         )
         scarlet_current_res.update(scarlet_photometry_current)
+
+        scarlet_shapes_current = compute_shapes(
+            field_image=blend.blend_images[field_num],
+            predictions=scarlet_current_predictions,
+            xpos=blend.catalog_list[field_num]["x_peak"],
+            ypos=blend.catalog_list[field_num]["y_peak"],
+            survey=survey,
+        )
+        scarlet_current_res.update(scarlet_shapes_current)
+
         scarlet_current_res = pd.DataFrame.from_dict(scarlet_current_res)
         scarlet_results.append(scarlet_current_res)
     # scarlet_results = vstack(scarlet_results)

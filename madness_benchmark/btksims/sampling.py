@@ -1,10 +1,38 @@
 """Deifne Custom Sampling for BTK."""
 
+import logging
 import warnings
 
 import numpy as np
 from btk.sampling_functions import SamplingFunction, _get_random_center_shift
 from btk.utils import DEFAULT_SEED
+
+# logging level set to INFO
+LOG = logging.getLogger(__name__)
+
+
+def check_repeated_pixel(x_peak, y_peak, pixel_scale, maxshift):
+    """Check repeated pixel.
+
+    Parameters
+    ----------
+    x_peak : float
+        x_peak in arc seconds
+    y_peak : float
+        y_peak in arc seconds
+    pixel_scale : float/int
+        pixel_scale of the survey
+    maxshift : float
+        maxshift in arc seconds
+
+    """
+    dim = int(2 * maxshift / pixel_scale + 1)
+    centers = np.zeros((dim, dim))
+    for x, y in zip(x_peak, y_peak):
+        x = int(np.round(x / pixel_scale) + maxshift / pixel_scale)
+        y = int(np.round(y / pixel_scale) + maxshift / pixel_scale)
+        centers[x][y] += 1
+    return True if np.sum(centers > 1) != 0 else False
 
 
 class CustomSampling(SamplingFunction):
@@ -19,6 +47,8 @@ class CustomSampling(SamplingFunction):
         maxshift=None,
         unique=True,
         seed=DEFAULT_SEED,
+        dataset="train_val",
+        pixel_scale=0,
     ):
         """Initialize default sampling function.
 
@@ -40,6 +70,10 @@ class CustomSampling(SamplingFunction):
             If true, galaxies are sampled sequentially from the catalog.
         seed: int
             Seed to initialize randomness for reproducibility.
+        dataset: str
+            either 'train_val' or 'test'
+        pixel_scale: int
+            survey pixel scale requred for test dataset to make sure centers don't lie in same pixel.
 
         """
         super().__init__(max_number=max_number, min_number=min_number, seed=seed)
@@ -48,6 +82,15 @@ class CustomSampling(SamplingFunction):
         self.index_range = index_range
         self.unique = unique
         self.indexes = list(np.arange(index_range[0], index_range[1]))
+
+        if dataset not in ["train_val", "test"]:
+            raise ValueError("dataset can only be either `train_val` or `test`")
+
+        if dataset == "test":
+            if pixel_scale == 0:
+                raise ValueError("Pass appropriate pixel scale")
+        self.pixel_scale = pixel_scale
+        self.dataset = dataset
 
     @property
     def compatible_catalogs(self):
@@ -107,6 +150,15 @@ class CustomSampling(SamplingFunction):
             x_peak, y_peak = _get_random_center_shift(
                 number_of_objects, self.maxshift, self.rng
             )
+            if self.dataset == "test":
+                while check_repeated_pixel(
+                    x_peak, y_peak, pixel_scale=self.pixel_scale, maxshift=self.maxshift
+                ):
+                    LOG.info("Repeated centres, sampling again...")
+                    # print(pd.DataFrame({'x': x_peak, 'y': y_peak})) # just to see if they were repeated
+                    x_peak, y_peak = _get_random_center_shift(
+                        number_of_objects, self.maxshift, self.rng
+                    )
         else:
             x_peak, y_peak = shifts
         blend_table["ra"] += x_peak
