@@ -14,7 +14,6 @@ repository = "https://github.com/b-biswas/madness-benchmark"
 [tool.poetry.dependencies]
 blending_toolkit = "1.0.0b2"
 galsim = "*"
-python = "^3.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
