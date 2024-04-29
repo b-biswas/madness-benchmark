@@ -55,7 +55,9 @@ for band in survey.available_filters:
 
 
 # Define function to make predictions with scarlet
-def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters, obs_psf):
+def predict_with_scarlet(
+    image, x_pos, y_pos, show_scene, show_sources, filters, obs_psf
+):
     """Deblend using the SCARLET deblender.
 
     Parameters
@@ -72,6 +74,8 @@ def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters,
         To run scarlet.display.show_sources or not.
     filters: list of hashable elements
         Names/identifiers of spectral channels
+    obs_psf: scarlet.ImagePSF
+        observed PSF.
 
     Returns
     -------
@@ -80,14 +84,19 @@ def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters,
 
     """
     weights = np.ones_like(image)
-    bkg = np.array([galcheat.utilities.mean_sky_level(survey, f).to_value("electron") for f in filters])
+    bkg = np.array(
+        [
+            galcheat.utilities.mean_sky_level(survey, f).to_value("electron")
+            for f in filters
+        ]
+    )
     weights = np.ones(image.shape) / bkg.reshape((-1, 1, 1))
     observation = scarlet.Observation(
         image, psf=obs_psf, weights=weights, channels=filters
     )
 
     model_psf = scarlet.GaussianPSF(
-        sigma=(0.7,)*len(filters)
+        sigma=(0.7,) * len(filters)
     )  # Setting this value according to the standard configuration of scarlet
     model_frame = scarlet.Frame(image.shape, psf=model_psf, channels=filters)
 
@@ -96,16 +105,16 @@ def predict_with_scarlet(image, x_pos, y_pos, show_scene, show_sources, filters,
     centers = [(x_pos[i], y_pos[i]) for i in range(len(x_pos))]
 
     sources, _ = scarlet.initialization.init_all_sources(
-                                                        model_frame,
-                                                        centers,
-                                                        observation,
-                                                        max_components=2,
-                                                        min_snr=50,
-                                                        thresh=1,
-                                                        fallback=True,
-                                                        silent=True,
-                                                        set_spectra=True,
-                                                    )
+        model_frame,
+        centers,
+        observation,
+        max_components=2,
+        min_snr=50,
+        thresh=1,
+        fallback=True,
+        silent=True,
+        set_spectra=True,
+    )
 
     scarlet_blend = scarlet.Blend(sources, observation)
 
