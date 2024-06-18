@@ -58,7 +58,7 @@ class CustomSampling(SamplingFunction):
             maximum number of galaxies in the stamp.
         min_number: int
             minimum number of galaxies in the stamp.
-        stamp_size: (=float
+        stamp_size: float
             Size of the desired stamp.
         index_range: tuple
             range to indexes to sample galaxies from the catalog.
