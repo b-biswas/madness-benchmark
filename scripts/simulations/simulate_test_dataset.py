@@ -58,6 +58,8 @@ sampling_function = CustomSampling(
     stamp_size=sim_config["stamp_size"],
     seed=sim_config["btk_seed"],
     unique=sim_config["unique_galaxies"],
+    dataset="test",
+    pixel_scale=.2,
 )
 
 draw_generator = generator(
