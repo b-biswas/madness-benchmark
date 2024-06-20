@@ -52,7 +52,7 @@ num_repetations = 300
 max_number = 20
 
 kl_weight = 10**-kl_weight_exp
-#weights_path = os.path.join(get_data_dir_path(), survey_name + str(kl_weight))
+# weights_path = os.path.join(get_data_dir_path(), survey_name + str(kl_weight))
 weights_path = os.path.join(get_data_dir_path(), survey_name)
 LOG.info(f"Loading Model weights from {weights_path}")
 
