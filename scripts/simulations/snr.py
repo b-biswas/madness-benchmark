@@ -1,20 +1,18 @@
+"""Computing SNR."""
+
 import os
-
-import yaml
-
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import astropy.table
 import btk
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+import yaml
 from galcheat.utilities import mag2counts, mean_sky_level
 from numba import jit
 
 from madness_benchmark.utils import get_benchmark_config_path
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 mpl.rcParams["text.usetex"] = True
 
 with open(get_benchmark_config_path()) as f:
@@ -56,19 +54,20 @@ sig_instr = 0  # Setting it to 0, because no instr noise
 
 @jit
 def computeFWHM(hlr_a, hlr_b):
-    """Compute the full width half maximu
+    """Compute the full width half maximum.
 
     Parameters
     ----------
     hlr_a: float
-        half light radius along semi-major axis
+        half light radius along semi-major axis.
     hlr_b: float
-        half light radius along semi-minor axis
+        half light radius along semi-minor axis.
 
     Returns
     -------
     fwhm: float
-        full-width-half-maximum of the galaxy
+        full-width-half-maximum of the galaxy.
+
     """
     fwhm = 2 * np.sqrt(
         hlr_a * hlr_b
@@ -84,18 +83,21 @@ def compute_snr(C, B, FWHM_gal, FWHM_PSF=r_filter.psf_fwhm.value, sig_instr=sig_
     Parameters
     ----------
     C: float
-        total source count
+        total source count.
     B: float
-        Background noise level
+        Background noise level.
     FWHM_gal: float
+        full-width-half-maximum of galaxy in the filter.
     FWHM_PSF: float
         full-width-half-maximum of PSF in the filter.
     sig_instr: float
         instrumental noise
 
-    Returns:
+    Returns
+    -------
     snr: float
-        snr in the given band
+        snr in the given band.
+
     """
     # convolve with PSF with FWHM of galaxy
     FWHM = np.sqrt(FWHM_gal**2 + FWHM_PSF**2)  # convolution of 2 PSF
