@@ -66,7 +66,7 @@ class CatsimDataset(tfds.core.GeneratorBasedBuilder):
         self.train_data_dir = train_data_dir
         self.val_data_dir = val_data_dir
 
-    def PopulateFileList(self, data_folder, survey):
+    def PopulateFileList(self, data_folder):
         """Populate file list.
 
         Parameters
