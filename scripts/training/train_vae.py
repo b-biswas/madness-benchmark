@@ -18,8 +18,8 @@ from madness_deblender.losses import (
 )
 from madness_deblender.utils import get_data_dir_path
 
-from madness_benchmark.utils import get_benchmark_config_path
 from madness_benchmark.dataset_generator import batched_CATSIMDataset
+from madness_benchmark.utils import get_benchmark_config_path
 
 tfd = tfp.distributions
 
