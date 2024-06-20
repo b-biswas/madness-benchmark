@@ -19,7 +19,7 @@ from madness_deblender.losses import (
 )
 from madness_deblender.utils import get_data_dir_path
 
-from madness_benchmark import get_benchmark_config_path
+from madness_benchmark.utils import get_benchmark_config_path
 
 tfd = tfp.distributions
 
@@ -30,13 +30,13 @@ LOG = logging.getLogger(__name__)
 
 # define the parameters
 batch_size = 100
-vae_epochs = 200
+vae_epochs = 250
 flow_epochs = 200
-deblender_epochs = 150
-lr_scheduler_epochs = 30
+deblender_epochs = 200
+lr_scheduler_epochs = 40
 latent_dim = 16
 linear_norm_coeff = 10000
-patience = 30
+patience = 20
 
 with open(get_benchmark_config_path()) as f:
     benchmark_config = yaml.safe_load(f)
@@ -97,7 +97,7 @@ ds_isolated_train, ds_isolated_val = batched_CATSIMDataset(
 
 if train_models.lower() == "all" or "vae" in train_models:
 
-    ssim_fraction = 0.25
+    ssim_fraction = 0.2
     # Define all used callbacks
     callbacks = define_callbacks(
         os.path.join(path_weights, "ssim"),
