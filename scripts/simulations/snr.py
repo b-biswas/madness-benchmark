@@ -6,13 +6,12 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 import astropy.table
 import btk
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from galcheat.utilities import mag2counts, mean_sky_level
 from numba import jit
-
-import matplotlib as mpl
 
 from madness_benchmark.utils import get_benchmark_config_path
 
@@ -112,7 +111,9 @@ def compute_snr(C, B, FWHM_gal, FWHM_PSF=r_filter.psf_fwhm.value, sig_instr=sig_
 
 for row in catalog:
     # Source counts
-    C = mag2counts(row["r_ab"], "LSST", "r").to_value("electron")  # converting to electron count
+    C = mag2counts(row["r_ab"], "LSST", "r").to_value(
+        "electron"
+    )  # converting to electron count
 
     # FWHM of galaxy
     FWHM_row_d = computeFWHM(row["a_d"], row["b_d"])
