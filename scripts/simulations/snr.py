@@ -76,6 +76,7 @@ def computeFWHM(hlr_a, hlr_b):
 
     return fwhm
 
+
 @jit
 def compute_snr(C, B, FWHM_gal, FWHM_PSF=r_filter.psf_fwhm.value, sig_instr=sig_instr):
     """Compute SNR.
