@@ -57,14 +57,46 @@ sig_instr = 0  # Setting it to 0, because no instr noise
 
 @jit
 def computeFWHM(hlr_a, hlr_b):
-    return 2 * np.sqrt(
+    """Compute the full width half maximu
+
+    Parameters
+    ----------
+    hlr_a: float
+        half light radius along semi-major axis
+    hlr_b: float
+        half light radius along semi-minor axis
+
+    Returns
+    -------
+    fwhm: float
+        full-width-half-maximum of the galaxy
+    """
+    fwhm = 2 * np.sqrt(
         hlr_a * hlr_b
     )  # fwhm = 2*hlr from: https://www.researchgate.net/publication/1778778_Accurate_photometry_of_extended_spherically_symmetric_sources/figures?lo=1
 
+    return fwhm
 
 @jit
 def compute_snr(C, B, FWHM_gal, FWHM_PSF=r_filter.psf_fwhm.value, sig_instr=sig_instr):
+    """Compute SNR.
 
+    Parameters
+    ----------
+    C: float
+        total source count
+    B: float
+        Background noise level
+    FWHM_gal: float
+    FWHM_PSF: float
+        full-width-half-maximum of PSF in the filter.
+    sig_instr: float
+        instrumental noise
+
+    Returns:
+    snr: float
+        snr in the given band
+    """
     # convolve with PSF with FWHM of galaxy
     FWHM = np.sqrt(FWHM_gal**2 + FWHM_PSF**2)  # convolution of 2 PSF
 
