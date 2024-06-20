@@ -13,7 +13,7 @@ import sep
 import tensorflow as tf
 import tensorflow_probability as tfp
 import yaml
-from madness_deblender.Deblender import Deblend
+from madness_deblender.deblender import Deblender
 from madness_deblender.utils import get_data_dir_path
 
 from madness_benchmark.metrics import (
@@ -52,7 +52,8 @@ num_repetations = 300
 max_number = 20
 
 kl_weight = 10**-kl_weight_exp
-weights_path = os.path.join(get_data_dir_path(), survey_name + str(kl_weight))
+# weights_path = os.path.join(get_data_dir_path(), survey_name + str(kl_weight))
+weights_path = os.path.join(get_data_dir_path(), survey_name)
 LOG.info(f"Loading Model weights from {weights_path}")
 
 simulation_path = os.path.join(benchmark_config["TEST_DATA_PATH"][survey_name], density)
@@ -63,7 +64,7 @@ LOG.info(f"Saving results to: {results_path}")
 LOG.info(f"Density level: {density_level}")
 LOG.info(f"Run name: {run_name}")
 
-deb = Deblend(latent_dim=16, weights_path=weights_path, survey=survey)
+deb = Deblender(latent_dim=16, weights_path=weights_path, survey=survey)
 
 psf_fwhm = []
 for band in survey.available_filters:

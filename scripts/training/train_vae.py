@@ -11,7 +11,6 @@ import tensorflow_probability as tfp
 import yaml
 from galcheat.utilities import mean_sky_level
 from madness_deblender.callbacks import changeAlpha, define_callbacks
-from madness_deblender.dataset_generator import batched_CATSIMDataset
 from madness_deblender.FlowVAEnet import FlowVAEnet
 from madness_deblender.losses import (
     deblender_encoder_loss_wrapper,
@@ -19,6 +18,7 @@ from madness_deblender.losses import (
 )
 from madness_deblender.utils import get_data_dir_path
 
+from madness_benchmark.dataset_generator import batched_CATSIMDataset
 from madness_benchmark.utils import get_benchmark_config_path
 
 tfd = tfp.distributions
@@ -80,7 +80,8 @@ f_net = FlowVAEnet(
 data_path = get_data_dir_path()
 
 # path_weights = os.path.join(data_path, f"catsim_kl{kl_weight_exp}{latent_dim}d")
-path_weights = os.path.join(data_path, survey.name + str(kl_weight))
+path_weights = os.path.join(data_path, survey.name)
+# path_weights = os.path.join(data_path, survey.name + str(kl_weight))
 
 # Define the generators
 ds_isolated_train, ds_isolated_val = batched_CATSIMDataset(
