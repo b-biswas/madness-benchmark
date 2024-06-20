@@ -3,7 +3,7 @@
 import os
 
 import yaml
-from madness_deblender.dataset_generator import loadCATSIMDataset
+from madness_benchmark.dataset_generator import loadCATSIMDataset
 
 from madness_benchmark.utils import get_benchmark_config_path
 
