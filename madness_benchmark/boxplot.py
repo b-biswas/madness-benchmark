@@ -192,7 +192,9 @@ def boxplot_func(
     ls=None,
     nbins=11,
     x_major_grid=False,
+    x_minor_grid=False,
     sns_font_scale=1.2,
+    mark_y_zero=True,
 ):
     """Return boxplot figure, median and standard deviation.
 
@@ -248,8 +250,12 @@ def boxplot_func(
         number of bins to split data
     x_major_grid:
         hide grids corresponding to major ticks in x-axis
+    x_minor_grid:
+        hide grids corresponding to minor ticks in x-axis
     sns_font_scale:
         fontscale parameter for seaborn
+    mark_y_zero:
+        Draw horizontal dashed line at y=0
 
     Returns
     -------
@@ -300,7 +306,10 @@ def boxplot_func(
     idx = np.digitize(df_plot[x], x_bins)
 
     sns.set(font_scale=sns_font_scale)
-    sns.set_style("whitegrid", {"grid.color": ".85", "grid.linestyle": "--"})
+    sns.set_style(
+        "whitegrid",
+        {"axes.grid": x_minor_grid, "grid.color": ".85", "grid.linestyle": "--"},
+    )
     # Initialize figure
     fig, axes = plt.subplots(
         2, 1, figsize=(6, 4), gridspec_kw={"height_ratios": [10, 2]}
@@ -361,7 +370,7 @@ def boxplot_func(
             loc=legend_location,
         )
 
-    ax.grid(axis="x", visible=True, which="minor")
+    ax.grid(axis="x", visible=x_minor_grid, which="minor")
 
     ax.tick_params(axis="x", which="minor", width=0)
 
@@ -370,7 +379,8 @@ def boxplot_func(
     ax.set_xticks(np.arange(nbins), minor=True)
 
     ax.grid(axis="y", visible=False, which="major")
-    ax.axhline(0, ls="--", color=plt.cm.gray(0.85), linewidth=1)
+    if mark_y_zero:
+        ax.axhline(0, ls="--", color=plt.cm.gray(0.85), linewidth=1)
     if y_ticks is not None:
         ax.set_yticks(y_ticks)
         ax.set_yticklabel(y_ticklabels)
@@ -391,7 +401,7 @@ def boxplot_func(
             alpha=0.2,
             element="poly",
         )
-        # axes[0].set_xlim(np.log10(xlim[0]), np.log10(xlim[1]))
+
     else:
         sns.histplot(
             df_plot[x],
@@ -405,7 +415,7 @@ def boxplot_func(
 
     axes[1].set_xlim(xlim[0], xlim[1])
 
-    axes[1].grid(visible=True, which="minor")
+    axes[1].grid(visible=x_minor_grid, which="minor")
     axes[1].grid(visible=x_major_grid, which="major")
 
     axes[1].set_yticks([])
